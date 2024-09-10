@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./survey.css";
 
 const questions = [
@@ -13,7 +13,12 @@ const SurveyApp = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(null);
   const [answers, setAnswers] = useState({});
   const [completed, setCompleted] = useState(false);
-  const [sessionId] = useState(new Date().getTime());
+  const [sessionId] = useState(new Date().getTime()); 
+
+  
+  useEffect(() => {
+    document.title = "Customer Survey";
+  }, []);
 
   const currentQuestion = currentQuestionIndex !== null ? questions[currentQuestionIndex] : null;
 
@@ -34,20 +39,27 @@ const SurveyApp = () => {
   };
 
   const handleSubmit = () => {
-    setCompleted(true);
-    const dataToStore = {
-      sessionId,
-      answers,
-      status: "COMPLETED",
-    };
-    localStorage.setItem(`survey-${sessionId}`, JSON.stringify(dataToStore));
-
-    setTimeout(() => {
-      setCompleted(false);
-      setCurrentQuestionIndex(null);
-      setAnswers({});
-    }, 5000);
+    const confirmation = window.confirm("Are you sure you want to submit the survey?");
+    if (confirmation) {
+      setCompleted(true);
+      const dataToStore = {
+        sessionId,
+        answers,
+        status: "COMPLETED",
+      };
+      localStorage.setItem(`survey-${sessionId}`, JSON.stringify(dataToStore));
+    }
   };
+
+  useEffect(() => {
+    if (completed) {
+      const timer = setTimeout(() => {
+        setCompleted(false);
+        setCurrentQuestionIndex(null); 
+      }, 5000);
+      return () => clearTimeout(timer); 
+    }
+  }, [completed]);
 
   const renderWelcomeScreen = () => (
     <div className="welcome-screen">
@@ -70,9 +82,7 @@ const SurveyApp = () => {
           {Array.from({ length: currentQuestion.scale }, (_, index) => (
             <div
               key={index}
-              className={`rating-circle ${
-                answers[currentQuestion.id] === index + 1 ? 'selected' : ''
-              }`}
+              className={`rating-circle ${answers[currentQuestion.id] === index + 1 ? 'selected' : ''}`}
               onClick={() => handleAnswerChange(index + 1)}
             >
               {index + 1}
@@ -118,7 +128,7 @@ const SurveyApp = () => {
   const renderCompletionScreen = () => (
     <div className="completion-screen">
       <h1 className="text-2xl font-bold text-green-600 mb-4">Thank you for your time!</h1>
-      <p className="text-gray-500">Redirecting to the welcome screen...</p>
+      <p className="text-lg text-gray-600">Redirecting you back to the welcome screen...</p>
     </div>
   );
 
