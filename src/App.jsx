@@ -13,12 +13,7 @@ const SurveyApp = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(null);
   const [answers, setAnswers] = useState({});
   const [completed, setCompleted] = useState(false);
-  const [sessionId] = useState(new Date().getTime()); 
-
-  
-  useEffect(() => {
-    document.title = "Customer Survey";
-  }, []);
+  const [sessionId] = useState(new Date().getTime());
 
   const currentQuestion = currentQuestionIndex !== null ? questions[currentQuestionIndex] : null;
 
@@ -41,28 +36,37 @@ const SurveyApp = () => {
   const handleSubmit = () => {
     const confirmation = window.confirm("Are you sure you want to submit the survey?");
     if (confirmation) {
-      setCompleted(true);
-      const dataToStore = {
-        sessionId,
-        answers,
-        status: "COMPLETED",
+      const now = new Date();
+      const formattedTimestamp = `${now.getDate()}/${now.getMonth() + 1}/${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`;
+  
+      const surveyData = {
+        sessionId: sessionId,  
+        answers: answers,     
+        status: "COMPLETED",   
+        submittedAt: formattedTimestamp  
       };
-      localStorage.setItem(`survey-${sessionId}`, JSON.stringify(dataToStore));
+  
+      localStorage.setItem(`survey-${sessionId}`, JSON.stringify(surveyData));
+  
+      setCompleted(true);
     }
   };
+  
+
 
   useEffect(() => {
     if (completed) {
       const timer = setTimeout(() => {
         setCompleted(false);
-        setCurrentQuestionIndex(null); 
+        setCurrentQuestionIndex(null);
       }, 5000);
-      return () => clearTimeout(timer); 
+      return () => clearTimeout(timer);
     }
   }, [completed]);
 
   const renderWelcomeScreen = () => (
     <div className="welcome-screen">
+      <h1 className="survey-title">Customer Survey</h1>
       <h2 className="text-3xl font-bold mb-4 text-blue-600">Welcome to our Survey</h2>
       <p className="text-lg mb-6 text-gray-600">Please press the start button to begin.</p>
       <button
@@ -76,6 +80,7 @@ const SurveyApp = () => {
 
   const renderQuestionScreen = () => (
     <div className="question-screen">
+      <h1 className="survey-title">Customer Survey</h1>
       <h2 className="text-xl font-semibold text-blue-700 mb-4">{currentQuestion.question}</h2>
       {currentQuestion.type === "rating" ? (
         <div className={`rating-buttons ${currentQuestion.scale === 10 ? "scale-10" : "scale-5"}`}>
