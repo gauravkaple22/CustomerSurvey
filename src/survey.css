@@ -16,7 +16,6 @@ body {
   background: inherit;
 }
 
-/* Welcome Screen Styling */
 .welcome-screen {
   display: flex;
   flex-direction: column;
